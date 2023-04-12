@@ -1,0 +1,5 @@
+group 'Hooks:CMI'
+
+dependencies {
+    compileOnly "com.Zrips:CMI:8.5.1.4"
+}

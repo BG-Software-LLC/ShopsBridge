@@ -1,0 +1,5 @@
+group 'Hooks:GUIShop'
+
+dependencies {
+    compileOnly "com.pablo67340:GUIShop:7.3.8"
+}

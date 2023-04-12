@@ -1,0 +1,5 @@
+group 'Hooks:NewtShop'
+
+dependencies {
+    compileOnly "com.newtjam:newtShop:2.0.3"
+}

@@ -1,0 +1,5 @@
+group 'Hooks:Essentials2_15'
+
+dependencies {
+    compileOnly 'com.earth2me:Essentials:2.15.0.17'
+}

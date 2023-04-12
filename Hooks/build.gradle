@@ -1,0 +1,7 @@
+group 'Hooks'
+
+subprojects {
+    dependencies {
+        compileOnly project(":API")
+    }
+}

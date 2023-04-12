@@ -1,0 +1,5 @@
+group 'Hooks:zShop'
+
+dependencies {
+    compileOnly "fr.maxlego08:zShop:2.0.0.7"
+}

@@ -1,0 +1,6 @@
+group 'Hooks:QuantumShop'
+
+dependencies {
+    compileOnly "su.fogus:FogusCore:1.9.9"
+    compileOnly "su.nightexpress:QuantumShop:3.8.0"
+}

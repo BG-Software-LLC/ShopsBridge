@@ -1,0 +1,70 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'maven-publish'
+}
+
+group 'ShopsBridge'
+
+project.ext {
+    targetFolder = file("target/")
+    buildVersion = System.getenv("BUILD_NUMBER") == null ? "Unknown" : "b" + System.getenv("BUILD_NUMBER")
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    repositories {
+        maven { url 'https://repo.bg-software.com/repository/nms/' }
+        maven { url 'https://repo.bg-software.com/repository/dependencies/' }
+    }
+
+    dependencies {
+        compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    }
+
+    task checkDebug() {
+        Set<File> filesWithDebug = fileTree('src/main/java').filter { file ->
+            file.text.contains('Bukkit.broadcastMessage')
+        }.getFiles()
+
+        if (!filesWithDebug.isEmpty())
+            throw new GradleException("Found debug messages: " + filesWithDebug)
+    }
+
+    build {
+        dependsOn checkDebug
+        dependsOn shadowJar
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation subprojects
+}
+
+shadowJar {
+    dependsOn(jar)
+
+    archiveFileName = rootProject.name + "-" + rootProject.buildVersion + ".jar"
+
+    delete fileTree(rootProject.targetFolder.getAbsolutePath())
+
+    exclude '*exclude.jar'
+
+    destinationDirectory = rootProject.targetFolder
+    from sourceSets.getByName("main").output
+    configurations = [project.configurations.getByName("runtimeClasspath")]
+}
+
+build {
+    dependsOn shadowJar
+}
+
+publish.shouldRunAfter shadowJar
+shadowJar.shouldRunAfter build
+build.shouldRunAfter subprojects.build
