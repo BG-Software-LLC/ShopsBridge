@@ -32,7 +32,7 @@ public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
         return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> getOrCreateShopDataForItem(itemStack).map(shopData -> {
             PlayerData playerData = ShopGuiPlugin.getInstance().getPlayerManager().getPlayerData(player);
             return BigDecimal.valueOf(shopData.shopItem.getSellPriceForAmount(shopData.shop, player, playerData, itemStack.getAmount()));
-        })).orElse(BigDecimal.ZERO);
+        })).orElseGet(() -> this.getSellPrice(itemStack));
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
         return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> getOrCreateShopDataForItem(itemStack).map(shopData -> {
             PlayerData playerData = ShopGuiPlugin.getInstance().getPlayerManager().getPlayerData(player);
             return BigDecimal.valueOf(shopData.shopItem.getBuyPriceForAmount(shopData.shop, player, playerData, itemStack.getAmount()));
-        })).orElse(BigDecimal.ZERO);
+        })).orElseGet(() -> this.getBuyPrice(itemStack));
     }
 
     @Override

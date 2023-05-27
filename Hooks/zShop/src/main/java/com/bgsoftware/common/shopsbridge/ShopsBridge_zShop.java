@@ -28,7 +28,7 @@ public class ShopsBridge_zShop implements IShopsBridge {
     public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> getItemButtonForItem(itemStack)
                 .map(itemButton -> BigDecimal.valueOf(itemButton.getSellPrice(player)))
-        ).orElse(BigDecimal.ZERO);
+        ).orElseGet(() -> this.getSellPrice(itemStack));
     }
 
     @Override
@@ -42,7 +42,7 @@ public class ShopsBridge_zShop implements IShopsBridge {
     public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> getItemButtonForItem(itemStack)
                 .map(itemButton -> BigDecimal.valueOf(itemButton.getBuyPrice(player)))
-        ).orElse(BigDecimal.ZERO);
+        ).orElseGet(() -> this.getBuyPrice(itemStack));
     }
 
     @Override
