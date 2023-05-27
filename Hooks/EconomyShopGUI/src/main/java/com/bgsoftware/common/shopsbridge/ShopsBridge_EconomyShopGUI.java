@@ -21,7 +21,7 @@ public class ShopsBridge_EconomyShopGUI implements IShopsBridge {
     public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         return Optional.ofNullable(offlinePlayer.getPlayer())
                 .map(player -> BigDecimal.valueOf(EconomyShopGUIHook.getItemSellPrice(player, itemStack)))
-                .orElse(this.getSellPrice(itemStack));
+                .orElseGet(() -> this.getSellPrice(itemStack));
     }
 
     @Override
@@ -33,7 +33,7 @@ public class ShopsBridge_EconomyShopGUI implements IShopsBridge {
     public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         return Optional.ofNullable(offlinePlayer.getPlayer())
                 .map(player -> BigDecimal.valueOf(EconomyShopGUIHook.getItemBuyPrice(player, itemStack)))
-                .orElse(this.getSellPrice(itemStack));
+                .orElseGet(() -> this.getBuyPrice(itemStack));
     }
 
     @Override
