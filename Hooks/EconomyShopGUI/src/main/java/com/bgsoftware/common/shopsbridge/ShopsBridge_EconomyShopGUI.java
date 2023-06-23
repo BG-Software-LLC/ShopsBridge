@@ -20,25 +20,31 @@ public class ShopsBridge_EconomyShopGUI implements IShopsBridge {
     @Override
     public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         return Optional.ofNullable(offlinePlayer.getPlayer())
-                .map(player -> BigDecimal.valueOf(EconomyShopGUIHook.getItemSellPrice(player, itemStack)))
+                .map(player -> EconomyShopGUIHook.getItemSellPrice(player, itemStack))
+                .map(BigDecimal::valueOf)
                 .orElseGet(() -> this.getSellPrice(itemStack));
     }
 
     @Override
     public BigDecimal getSellPrice(ItemStack itemStack) {
-        return BigDecimal.valueOf(EconomyShopGUIHook.getItemSellPrice(itemStack));
+        return Optional.ofNullable(EconomyShopGUIHook.getItemSellPrice(itemStack))
+                .map(BigDecimal::valueOf)
+                .orElse(BigDecimal.ZERO);
     }
 
     @Override
     public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         return Optional.ofNullable(offlinePlayer.getPlayer())
-                .map(player -> BigDecimal.valueOf(EconomyShopGUIHook.getItemBuyPrice(player, itemStack)))
+                .map(player -> EconomyShopGUIHook.getItemBuyPrice(player, itemStack))
+                .map(BigDecimal::valueOf)
                 .orElseGet(() -> this.getBuyPrice(itemStack));
     }
 
     @Override
     public BigDecimal getBuyPrice(ItemStack itemStack) {
-        return BigDecimal.valueOf(EconomyShopGUIHook.getItemBuyPrice(itemStack));
+        return Optional.ofNullable(EconomyShopGUIHook.getItemBuyPrice(itemStack))
+                .map(BigDecimal::valueOf)
+                .orElse(BigDecimal.ZERO);
     }
 
     @Override
