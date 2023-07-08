@@ -1,0 +1,12 @@
+group 'Hooks:ExcellentShop'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+dependencies {
+    compileOnly 'su.nightexpress.nexshop:ExcellentShop:4.4.1'
+    compileOnly 'su.nexmedia.engine:NexEngine:2.2.10'
+}

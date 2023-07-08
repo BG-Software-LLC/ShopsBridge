@@ -32,6 +32,15 @@ public enum ShopsProvider {
         }
     },
 
+    EXCELLENTSHOP("ExcellentShop", null) {
+        @Override
+        protected IShopsBridge createInstanceInternal(Plugin plugin) throws Exception {
+            Class<?> excellentShopClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_ExcellentShop");
+            Constructor<?> constructor = excellentShopClass.getConstructor(Plugin.class);
+            return (IShopsBridge) constructor.newInstance(plugin);
+        }
+    },
+
     GUISHOP("GUIShop", ShopsBridge_GUIShop.class),
 
     NEWTSHOP("newtShop", ShopsBridge_newtShop.class),
