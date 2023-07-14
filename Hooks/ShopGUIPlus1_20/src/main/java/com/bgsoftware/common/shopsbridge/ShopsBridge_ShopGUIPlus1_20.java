@@ -5,19 +5,17 @@ import net.brcdev.shopgui.player.PlayerData;
 import net.brcdev.shopgui.shop.Shop;
 import net.brcdev.shopgui.shop.ShopItem;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
-
-    // Added cache for shop items for better performance
-    private final Map<ItemStack, ShopData> cachedShopItems = new HashMap<>();
 
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
     private final ShopGuiPlugin plugin;
@@ -29,7 +27,7 @@ public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
 
     @Override
     public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
-        return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> getOrCreateShopDataForItem(itemStack).map(shopData -> {
+        return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> findShopItem(itemStack, player).map(shopData -> {
             PlayerData playerData = ShopGuiPlugin.getInstance().getPlayerManager().getPlayerData(player);
             return BigDecimal.valueOf(shopData.shopItem.getSellPriceForAmount(shopData.shop, player, playerData, itemStack.getAmount()));
         })).orElseGet(() -> this.getSellPrice(itemStack));
@@ -37,7 +35,7 @@ public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
 
     @Override
     public BigDecimal getSellPrice(ItemStack itemStack) {
-        return getOrCreateShopDataForItem(itemStack).map(shopData -> {
+        return findShopItem(itemStack, null).map(shopData -> {
             // noinspection deprecation
             return BigDecimal.valueOf(shopData.shopItem.getSellPriceForAmount(itemStack.getAmount()));
         }).orElse(BigDecimal.ZERO);
@@ -45,7 +43,7 @@ public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
 
     @Override
     public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
-        return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> getOrCreateShopDataForItem(itemStack).map(shopData -> {
+        return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> findShopItem(itemStack, player).map(shopData -> {
             PlayerData playerData = ShopGuiPlugin.getInstance().getPlayerManager().getPlayerData(player);
             return BigDecimal.valueOf(shopData.shopItem.getBuyPriceForAmount(shopData.shop, player, playerData, itemStack.getAmount()));
         })).orElseGet(() -> this.getBuyPrice(itemStack));
@@ -53,7 +51,7 @@ public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
 
     @Override
     public BigDecimal getBuyPrice(ItemStack itemStack) {
-        return getOrCreateShopDataForItem(itemStack).map(shopData -> {
+        return findShopItem(itemStack, null).map(shopData -> {
             // noinspection deprecation
             return BigDecimal.valueOf(shopData.shopItem.getBuyPriceForAmount(itemStack.getAmount()));
         }).orElse(BigDecimal.ZERO);
@@ -64,22 +62,18 @@ public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
         return this.readyFuture;
     }
 
-    private Optional<ShopData> getOrCreateShopDataForItem(ItemStack itemStack) {
-        ItemStack itemKey = itemStack.clone();
-        itemKey.setAmount(1);
-
-        return Optional.ofNullable(this.cachedShopItems.computeIfAbsent(itemKey, i -> {
-            Map<String, Shop> shops = this.plugin.getShopManager().shops;
-            for (Shop shop : shops.values()) {
-                for (ShopItem shopItem : shop.getShopItems()) {
-                    if (shopItem.getItem().isSimilar(itemStack)) {
-                        return new ShopData(shop, shopItem);
-                    }
+    private Optional<ShopData> findShopItem(ItemStack itemStack, @Nullable Player player) {
+        Map<String, Shop> shops = this.plugin.getShopManager().shops;
+        for (Shop shop : shops.values()) {
+            for (ShopItem shopItem : shop.getShopItems()) {
+                if ((player == null || shop.hasAccess(player, shopItem, true)) &&
+                        shopItem.getItem().isSimilar(itemStack)) {
+                    return Optional.of(new ShopData(shop, shopItem));
                 }
             }
+        }
 
-            return null;
-        }));
+        return Optional.empty();
     }
 
     private static class ShopData {
