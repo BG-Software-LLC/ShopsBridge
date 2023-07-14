@@ -44,4 +44,37 @@ public class ShopsBridge_CMI implements IShopsBridge {
         return this.readyFuture;
     }
 
+    @Override
+    public BulkTransaction startBulkTransaction() {
+        return new BulkTransactionImpl();
+    }
+
+    private static class BulkTransactionImpl implements BulkTransaction {
+
+        private final ItemStackCache<WorthItem> cache = new ItemStackCache<>();
+
+        @Override
+        public BigDecimal getSellPrice(OfflinePlayer unused, ItemStack itemStack) {
+            return this.getSellPrice(itemStack);
+        }
+
+        @Override
+        public BigDecimal getSellPrice(ItemStack itemStack) {
+            WorthItem worth = this.cache.computeIfAbsent(itemStack, () -> CMI.getInstance().getWorthManager().getWorth(itemStack));
+            return worth == null ? BigDecimal.ZERO : BigDecimal.valueOf(worth.getSellPrice() * itemStack.getAmount());
+        }
+
+        @Override
+        public BigDecimal getBuyPrice(OfflinePlayer unused, ItemStack itemStack) {
+            return this.getBuyPrice(itemStack);
+        }
+
+        @Override
+        public BigDecimal getBuyPrice(ItemStack itemStack) {
+            WorthItem worth = this.cache.computeIfAbsent(itemStack, () -> CMI.getInstance().getWorthManager().getWorth(itemStack));
+            return worth == null ? BigDecimal.ZERO : BigDecimal.valueOf(worth.getBuyPrice() * itemStack.getAmount());
+        }
+
+    }
+
 }

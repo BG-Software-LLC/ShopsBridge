@@ -62,6 +62,11 @@ public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
         return this.readyFuture;
     }
 
+    @Override
+    public BulkTransaction startBulkTransaction() {
+        return new BulkTransactionImpl();
+    }
+
     private Optional<ShopData> findShopItem(ItemStack itemStack, @Nullable Player player) {
         Map<String, Shop> shops = this.plugin.getShopManager().shops;
         for (Shop shop : shops.values()) {
@@ -74,6 +79,46 @@ public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
         }
 
         return Optional.empty();
+    }
+
+    private class BulkTransactionImpl implements BulkTransaction {
+
+        private final ItemStackCache<ShopData> cache = new ItemStackCache<>();
+
+        @Override
+        public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+            return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player ->
+                    Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> findShopItem(itemStack, player).orElse(null))).map(shopData -> {
+                        PlayerData playerData = ShopGuiPlugin.getInstance().getPlayerManager().getPlayerData(player);
+                        return BigDecimal.valueOf(shopData.shopItem.getSellPriceForAmount(shopData.shop, player, playerData, itemStack.getAmount()));
+                    })).orElseGet(() -> this.getSellPrice(itemStack));
+        }
+
+        @Override
+        public BigDecimal getSellPrice(ItemStack itemStack) {
+            return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> findShopItem(itemStack, null).orElse(null))).map(shopData -> {
+                // noinspection deprecation
+                return BigDecimal.valueOf(shopData.shopItem.getSellPriceForAmount(itemStack.getAmount()));
+            }).orElse(BigDecimal.ZERO);
+        }
+
+        @Override
+        public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+            return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player ->
+                    Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> findShopItem(itemStack, player).orElse(null))).map(shopData -> {
+                        PlayerData playerData = ShopGuiPlugin.getInstance().getPlayerManager().getPlayerData(player);
+                        return BigDecimal.valueOf(shopData.shopItem.getBuyPriceForAmount(shopData.shop, player, playerData, itemStack.getAmount()));
+                    })).orElseGet(() -> this.getBuyPrice(itemStack));
+        }
+
+        @Override
+        public BigDecimal getBuyPrice(ItemStack itemStack) {
+            return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> findShopItem(itemStack, null).orElse(null))).map(shopData -> {
+                // noinspection deprecation
+                return BigDecimal.valueOf(shopData.shopItem.getBuyPriceForAmount(itemStack.getAmount()));
+            }).orElse(BigDecimal.ZERO);
+        }
+
     }
 
     private static class ShopData {

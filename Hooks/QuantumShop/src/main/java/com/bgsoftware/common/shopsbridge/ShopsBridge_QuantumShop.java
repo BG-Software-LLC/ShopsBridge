@@ -51,6 +51,11 @@ public class ShopsBridge_QuantumShop implements IShopsBridge {
         return this.readyFuture;
     }
 
+    @Override
+    public BulkTransaction startBulkTransaction() {
+        return new BulkTransactionImpl();
+    }
+
     private Optional<ShopProduct> getShopProduct(ItemStack itemStack) {
         for (ShopGUI shop : this.guiShop.getShops()) {
             for (ShopProduct shopProduct : shop.getProducts().values()) {
@@ -69,6 +74,36 @@ public class ShopsBridge_QuantumShop implements IShopsBridge {
         } else {
             return check.isSimilar(itemStack);
         }
+    }
+
+    private class BulkTransactionImpl implements BulkTransaction {
+
+        private final ItemStackCache<ShopProduct> cache = new ItemStackCache<>();
+
+        @Override
+        public BigDecimal getSellPrice(OfflinePlayer unused, ItemStack itemStack) {
+            return this.getSellPrice(itemStack);
+        }
+
+        @Override
+        public BigDecimal getSellPrice(ItemStack itemStack) {
+            return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> getShopProduct(itemStack).orElse(null)))
+                    .map(shopProduct -> BigDecimal.valueOf(shopProduct.getSellPrice()))
+                    .orElse(BigDecimal.ZERO);
+        }
+
+        @Override
+        public BigDecimal getBuyPrice(OfflinePlayer unused, ItemStack itemStack) {
+            return this.getBuyPrice(itemStack);
+        }
+
+        @Override
+        public BigDecimal getBuyPrice(ItemStack itemStack) {
+            return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> getShopProduct(itemStack).orElse(null)))
+                    .map(shopProduct -> BigDecimal.valueOf(shopProduct.getBuyPrice(true)))
+                    .orElse(BigDecimal.ZERO);
+        }
+
     }
 
 }

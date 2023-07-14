@@ -1,6 +1,7 @@
 package com.bgsoftware.common.shopsbridge;
 
 import com.newtjam.newtShop.newtShop;
+import com.newtjam.newtShop.structure.Item;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -39,6 +40,39 @@ public class ShopsBridge_newtShop implements IShopsBridge {
     @Override
     public CompletableFuture<Void> getWhenShopsLoaded() {
         return this.readyFuture;
+    }
+
+    @Override
+    public BulkTransaction startBulkTransaction() {
+        return new BulkTransactionImpl();
+    }
+
+    private static class BulkTransactionImpl implements BulkTransaction {
+
+        private final ItemStackCache<Item> cache = new ItemStackCache<>();
+
+        @Override
+        public BigDecimal getSellPrice(OfflinePlayer unused, ItemStack itemStack) {
+            return this.getSellPrice(itemStack);
+        }
+
+        @Override
+        public BigDecimal getSellPrice(ItemStack itemStack) {
+            return BigDecimal.valueOf(this.cache.computeIfAbsent(itemStack, () ->
+                    newtShop.shop.getItemFromItemStack(itemStack)).getSellPrice() * itemStack.getAmount());
+        }
+
+        @Override
+        public BigDecimal getBuyPrice(OfflinePlayer unused, ItemStack itemStack) {
+            return this.getBuyPrice(itemStack);
+        }
+
+        @Override
+        public BigDecimal getBuyPrice(ItemStack itemStack) {
+            return BigDecimal.valueOf(this.cache.computeIfAbsent(itemStack, () ->
+                    newtShop.shop.getItemFromItemStack(itemStack)).getBuyPrice() * itemStack.getAmount());
+        }
+
     }
 
 }

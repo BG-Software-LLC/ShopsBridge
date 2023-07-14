@@ -68,6 +68,11 @@ public class ShopsBridge_ShopGUIPlus1_80 implements IShopsBridge {
         return this.readyFuture;
     }
 
+    @Override
+    public BulkTransaction startBulkTransaction() {
+        return new BulkTransactionImpl();
+    }
+
     private void ensureShopsLoaded() {
         if (!this.plugin.getShopManager().areShopsLoaded())
             this.plugin.getShopManager().load();
@@ -79,6 +84,42 @@ public class ShopsBridge_ShopGUIPlus1_80 implements IShopsBridge {
         } else {
             return Optional.ofNullable(this.plugin.getShopManager().findShopItemByItemStack(player, itemStack, false));
         }
+    }
+
+    private class BulkTransactionImpl implements BulkTransaction {
+
+        private final ItemStackCache<ShopItem> cache = new ItemStackCache<>();
+
+        @Override
+        public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+            return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player ->
+                    Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> findShopItem(itemStack, player).orElse(null)))
+                            .map(shopItem -> BigDecimal.valueOf(shopItem.getSellPriceForAmount(player, itemStack.getAmount())))
+            ).orElseGet(() -> this.getSellPrice(itemStack));
+        }
+
+        @Override
+        public BigDecimal getSellPrice(ItemStack itemStack) {
+            return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> findShopItem(itemStack, null).orElse(null)))
+                    .map(shopItem -> BigDecimal.valueOf(shopItem.getSellPriceForAmount(itemStack.getAmount())))
+                    .orElse(BigDecimal.ZERO);
+        }
+
+        @Override
+        public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+            return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player ->
+                    Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> findShopItem(itemStack, player).orElse(null)))
+                            .map(shopItem -> BigDecimal.valueOf(shopItem.getBuyPriceForAmount(player, itemStack.getAmount())))
+            ).orElseGet(() -> this.getBuyPrice(itemStack));
+        }
+
+        @Override
+        public BigDecimal getBuyPrice(ItemStack itemStack) {
+            return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> findShopItem(itemStack, null).orElse(null)))
+                    .map(shopItem -> BigDecimal.valueOf(shopItem.getBuyPriceForAmount(itemStack.getAmount())))
+                    .orElse(BigDecimal.ZERO);
+        }
+
     }
 
 }
