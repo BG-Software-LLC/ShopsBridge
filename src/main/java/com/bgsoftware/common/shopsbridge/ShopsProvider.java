@@ -45,6 +45,8 @@ public enum ShopsProvider {
 
     NEWTSHOP("newtShop", ShopsBridge_newtShop.class),
 
+    NEXTGENS("NextGens", ShopsBridge_NextGens.class),
+
     QUANTUMSHOP("QuantumShop", ShopsBridge_QuantumShop.class),
 
     SHOPGUIPLUS("ShopGUIPlus", null) {
