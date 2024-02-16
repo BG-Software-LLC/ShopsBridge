@@ -1,4 +1,4 @@
-group 'Hooks:ExcellentShop'
+group 'Hooks:ExcellentShop4_8'
 
 java {
     toolchain {
@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'su.nightexpress.nexshop:ExcellentShop:4.4.1'
+    compileOnly 'su.nightexpress.nexshop:ExcellentShop:4.8.6'
     compileOnly 'su.nexmedia.engine:NexEngine:2.2.10'
     compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:1.0.2"
 }

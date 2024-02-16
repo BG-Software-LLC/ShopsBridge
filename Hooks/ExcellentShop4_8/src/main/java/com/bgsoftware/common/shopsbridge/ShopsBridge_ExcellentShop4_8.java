@@ -1,31 +1,26 @@
 package com.bgsoftware.common.shopsbridge;
 
-import com.bgsoftware.common.reflection.ReflectMethod;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.ItemProduct;
-import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.api.shop.VirtualShop;
+import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class ShopsBridge_ExcellentShop implements IShopsBridge {
+public class ShopsBridge_ExcellentShop4_8 implements IShopsBridge {
 
-    private static final ReflectMethod<VirtualProduct> VIRTUAL_SHOP_MODULE_GET_BEST_PRODUCT_FOR_METHOD =
-            new ReflectMethod<>(VirtualShopModule.class, VirtualProduct.class, "getBestProductFor", Player.class, ItemStack.class, TradeType.class);
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
     private final ExcellentShop excellentShop;
 
-    public ShopsBridge_ExcellentShop(Plugin plugin) {
+    public ShopsBridge_ExcellentShop4_8(Plugin plugin) {
         this.excellentShop = JavaPlugin.getPlugin(ExcellentShop.class);
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
@@ -35,7 +30,7 @@ public class ShopsBridge_ExcellentShop implements IShopsBridge {
         return Optional.ofNullable(this.excellentShop.getVirtualShop())
                 .flatMap(virtualShopModule ->
                         Optional.ofNullable(offlinePlayer.getPlayer())
-                                .map(player -> VIRTUAL_SHOP_MODULE_GET_BEST_PRODUCT_FOR_METHOD.invoke(virtualShopModule, player, itemStack, TradeType.SELL))
+                                .map(player -> virtualShopModule.getBestProductFor(player, itemStack, TradeType.SELL))
                                 .map(virtualProduct -> getPrice(virtualProduct, itemStack)))
                 .map(BigDecimal::valueOf)
                 .orElseGet(() -> this.getSellPrice(itemStack));
@@ -54,7 +49,7 @@ public class ShopsBridge_ExcellentShop implements IShopsBridge {
         return Optional.ofNullable(this.excellentShop.getVirtualShop())
                 .flatMap(virtualShopModule ->
                         Optional.ofNullable(offlinePlayer.getPlayer())
-                                .map(player -> VIRTUAL_SHOP_MODULE_GET_BEST_PRODUCT_FOR_METHOD.invoke(virtualShopModule, player, itemStack, TradeType.BUY))
+                                .map(player -> virtualShopModule.getBestProductFor(player, itemStack, TradeType.BUY))
                                 .map(virtualProduct -> getPrice(virtualProduct, itemStack)))
                 .map(BigDecimal::valueOf)
                 .orElseGet(() -> this.getBuyPrice(itemStack));
@@ -82,9 +77,10 @@ public class ShopsBridge_ExcellentShop implements IShopsBridge {
         return Optional.ofNullable(this.excellentShop.getVirtualShop()).map(virtualShopModule -> {
             for (VirtualShop virtualShop : virtualShopModule.getShops()) {
                 if (virtualShop.isTransactionEnabled(tradeType)) {
-                    for (VirtualProduct virtualProduct : (Collection<VirtualProduct>) virtualShop.getProducts()) {
-                        if (virtualProduct instanceof ItemProduct) {
-                            if (!((ItemProduct) virtualProduct).isItemMatches(itemStack))
+                    for (VirtualProduct virtualProduct : virtualShop.getProducts()) {
+                        ProductPacker packer = virtualProduct.getPacker();
+                        if (packer instanceof ItemPacker) {
+                            if (!((ItemPacker) packer).isItemMatches(itemStack))
                                 continue;
                         }
 
@@ -109,7 +105,7 @@ public class ShopsBridge_ExcellentShop implements IShopsBridge {
     }
 
     private static double getPrice(VirtualProduct product, ItemStack itemStack) {
-        return product.getPricer().getPriceSell() * ((double) itemStack.getAmount() / product.getUnitAmount());
+        return product.getPricer().getSellPrice() * ((double) itemStack.getAmount() / product.getUnitAmount());
     }
 
     private class BulkTransactionImpl implements BulkTransaction {
@@ -121,7 +117,7 @@ public class ShopsBridge_ExcellentShop implements IShopsBridge {
             return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> {
                         return Optional.ofNullable(excellentShop.getVirtualShop())
                                 .flatMap(virtualShopModule -> Optional.ofNullable(offlinePlayer.getPlayer())
-                                        .map(player -> VIRTUAL_SHOP_MODULE_GET_BEST_PRODUCT_FOR_METHOD.invoke(virtualShopModule, player, itemStack, TradeType.SELL)))
+                                        .map(player -> virtualShopModule.getBestProductFor(player, itemStack, TradeType.SELL)))
                                 .orElse(null);
                     })).map(virtualProduct -> getPrice(virtualProduct, itemStack))
                     .map(BigDecimal::valueOf)
@@ -141,7 +137,7 @@ public class ShopsBridge_ExcellentShop implements IShopsBridge {
             return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> {
                         return Optional.ofNullable(excellentShop.getVirtualShop())
                                 .flatMap(virtualShopModule -> Optional.ofNullable(offlinePlayer.getPlayer())
-                                        .map(player -> VIRTUAL_SHOP_MODULE_GET_BEST_PRODUCT_FOR_METHOD.invoke(virtualShopModule, player, itemStack, TradeType.BUY)))
+                                        .map(player -> virtualShopModule.getBestProductFor(player, itemStack, TradeType.BUY)))
                                 .orElse(null);
                     })).map(virtualProduct -> getPrice(virtualProduct, itemStack))
                     .map(BigDecimal::valueOf)
