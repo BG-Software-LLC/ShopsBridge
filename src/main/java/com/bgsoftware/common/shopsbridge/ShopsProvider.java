@@ -35,7 +35,16 @@ public enum ShopsProvider {
     EXCELLENTSHOP("ExcellentShop", null) {
         @Override
         protected IShopsBridge createInstanceInternal(Plugin plugin) throws Exception {
-            Class<?> excellentShopClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_ExcellentShop");
+            Plugin excellentShop = plugin.getServer().getPluginManager().getPlugin("ExcellentShop");
+
+            Class<?> excellentShopClass;
+            try {
+                Class.forName("su.nightexpress.nexshop.api.shop.product.VirtualProduct");
+                excellentShopClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_ExcellentShop4_8");
+            } catch (ClassNotFoundException error) {
+                excellentShopClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_ExcellentShop4_4");
+            }
+
             Constructor<?> constructor = excellentShopClass.getConstructor(Plugin.class);
             return (IShopsBridge) constructor.newInstance(plugin);
         }
