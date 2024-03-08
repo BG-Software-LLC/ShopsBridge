@@ -28,9 +28,11 @@ allprojects {
     repositories {
         maven { url 'https://repo.bg-software.com/repository/nms/' }
         maven { url 'https://repo.bg-software.com/repository/dependencies/' }
+        maven { url 'https://repo.bg-software.com/repository/common/' }
     }
 
     dependencies {
+        compileOnly 'com.bgsoftware.common.annotations:Annotations:b2'
         compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     }
 

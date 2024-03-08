@@ -15,4 +15,5 @@ include 'Hooks:ShopGUIPlus1_20'
 include 'Hooks:ShopGUIPlus1_43'
 include 'Hooks:ShopGUIPlus1_80'
 include 'Hooks:zShop'
+include 'Hooks:zShop3'
 

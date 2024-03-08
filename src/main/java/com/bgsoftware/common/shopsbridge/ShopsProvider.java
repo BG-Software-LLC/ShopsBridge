@@ -81,7 +81,18 @@ public enum ShopsProvider {
         }
     },
 
-    ZSHOP("zShop", ShopsBridge_zShop.class);
+    ZSHOP("zShop", null) {
+        @Override
+        protected IShopsBridge createInstanceInternal(Plugin plugin) {
+            // Determine which version of zShop we have installed.
+            try {
+                Class.forName("fr.maxlego08.zshop.api.ShopManager");
+                return new ShopsBridge_zShop3(plugin);
+            } catch (ClassNotFoundException error) {
+                return new ShopsBridge_zShop(plugin);
+            }
+        }
+    };
 
     private final String pluginName;
     private final Class<?> clazz;
