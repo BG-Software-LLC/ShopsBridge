@@ -1,0 +1,11 @@
+group 'Hooks:NextGens'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+dependencies {
+    compileOnly "com.muhammaddaffa:NextGens:1.1.1"
+}
