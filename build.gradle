@@ -4,6 +4,10 @@ plugins {
     id 'maven-publish'
 }
 
+java {
+    withSourcesJar()
+}
+
 group 'ShopsBridge'
 
 project.ext {
@@ -14,6 +18,12 @@ project.ext {
 allprojects {
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(8))
+        }
+    }
 
     repositories {
         maven { url 'https://repo.bg-software.com/repository/nms/' }

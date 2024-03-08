@@ -45,7 +45,14 @@ public enum ShopsProvider {
 
     NEWTSHOP("newtShop", ShopsBridge_newtShop.class),
 
-    NEXTGENS("NextGens", ShopsBridge_NextGens.class),
+    NEXTGENS("NextGens", null) {
+        @Override
+        protected IShopsBridge createInstanceInternal(Plugin plugin) throws Exception {
+            Class<?> nextGensClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_NextGens");
+            Constructor<?> constructor = nextGensClass.getConstructor(Plugin.class);
+            return (IShopsBridge) constructor.newInstance(plugin);
+        }
+    },
 
     QUANTUMSHOP("QuantumShop", ShopsBridge_QuantumShop.class),
 
