@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class ShopsBridge_NextGens implements IShopsBridge {
@@ -24,8 +25,10 @@ public class ShopsBridge_NextGens implements IShopsBridge {
 
     @Override
     public BigDecimal getSellPrice(ItemStack itemStack) {
-        BigDecimal price = BigDecimal.valueOf(NextGens.getApi().getWorth(itemStack));
-        return price == null ? BigDecimal.ZERO : price.multiply(BigDecimal.valueOf(itemStack.getAmount()));
+        BigDecimal price = Optional.ofNullable(NextGens.getApi().getWorth(itemStack))
+                .map(BigDecimal::valueOf).orElse(null);
+        return price == null ? BigDecimal.ZERO : itemStack.getAmount() <= 1 ? price :
+                price.multiply(BigDecimal.valueOf(itemStack.getAmount()));
     }
 
     @Override
