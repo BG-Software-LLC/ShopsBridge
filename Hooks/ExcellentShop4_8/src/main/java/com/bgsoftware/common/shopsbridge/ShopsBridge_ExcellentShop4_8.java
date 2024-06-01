@@ -5,8 +5,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
@@ -20,10 +19,8 @@ import java.util.concurrent.CompletableFuture;
 public class ShopsBridge_ExcellentShop4_8 implements IShopsBridge {
 
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
-    private final ExcellentShop excellentShop;
 
     public ShopsBridge_ExcellentShop4_8(Plugin plugin) {
-        this.excellentShop = JavaPlugin.getPlugin(ExcellentShop.class);
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
@@ -81,12 +78,12 @@ public class ShopsBridge_ExcellentShop4_8 implements IShopsBridge {
 
     private Optional<VirtualProduct> getVirtualProductFor(ItemStack itemStack, TradeType tradeType, @Nullable Player player) {
         return player == null ? getShopProduct(itemStack, tradeType) :
-                Optional.ofNullable(this.excellentShop.getVirtualShop())
+                Optional.ofNullable(ShopAPI.getVirtualShop())
                         .map(virtualShopModule -> virtualShopModule.getBestProductFor(player, itemStack, tradeType));
     }
 
     private Optional<VirtualProduct> getShopProduct(ItemStack itemStack, TradeType tradeType) {
-        return Optional.ofNullable(this.excellentShop.getVirtualShop()).map(virtualShopModule -> {
+        return Optional.ofNullable(ShopAPI.getVirtualShop()).map(virtualShopModule -> {
             for (VirtualShop virtualShop : virtualShopModule.getShops()) {
                 if (virtualShop.isTransactionEnabled(tradeType)) {
                     for (VirtualProduct virtualProduct : virtualShop.getProducts()) {
