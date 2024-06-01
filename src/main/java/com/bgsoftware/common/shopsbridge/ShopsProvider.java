@@ -106,7 +106,9 @@ public enum ShopsProvider {
         if (isPluginEnabled()) {
             try {
                 return Optional.of(createInstanceInternal(plugin));
-            } catch (Exception ignored) {
+            } catch (Exception error) {
+                plugin.getLogger().info("An error occurred while loading shops-bridge hook for " + getPluginName());
+                error.printStackTrace();
             }
         }
 
