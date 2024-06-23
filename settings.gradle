@@ -1,5 +1,6 @@
 rootProject.name = 'ShopsBridge'
 include 'API'
+include 'Folia'
 include 'Hooks'
 include 'Hooks:CMI'
 include 'Hooks:EconomyShopGUI'

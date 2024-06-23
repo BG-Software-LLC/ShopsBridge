@@ -1,5 +1,6 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import com.muhammaddaffa.nextgens.NextGens;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
@@ -15,7 +16,7 @@ public class ShopsBridge_NextGens implements IShopsBridge {
 
 
     public ShopsBridge_NextGens(Plugin plugin) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
+        Scheduler.runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
     @Override

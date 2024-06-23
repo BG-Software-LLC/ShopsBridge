@@ -33,7 +33,6 @@ allprojects {
 
     dependencies {
         compileOnly 'com.bgsoftware.common.annotations:Annotations:b2'
-        compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     }
 
     task checkDebug() {
@@ -57,6 +56,8 @@ repositories {
 
 dependencies {
     implementation subprojects
+
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
 }
 
 shadowJar {

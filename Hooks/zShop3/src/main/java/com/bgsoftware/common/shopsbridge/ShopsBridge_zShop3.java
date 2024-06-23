@@ -1,6 +1,8 @@
 package com.bgsoftware.common.shopsbridge;
 
 import com.bgsoftware.common.annotations.Nullable;
+import com.bgsoftware.common.shopsbridge.internal.ItemStackCache;
+import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import fr.maxlego08.zshop.api.ShopManager;
 import fr.maxlego08.zshop.api.buttons.ItemButton;
 import org.bukkit.Bukkit;
@@ -23,7 +25,7 @@ public class ShopsBridge_zShop3 implements IShopsBridge {
     public ShopsBridge_zShop3(Plugin plugin) {
         RegisteredServiceProvider<ShopManager> provider = Bukkit.getServicesManager().getRegistration(ShopManager.class);
         this.shopManager = Objects.requireNonNull(provider == null ? null : provider.getProvider());
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
+        Scheduler.runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
     @Override

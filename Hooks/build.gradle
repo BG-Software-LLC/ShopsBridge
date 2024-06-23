@@ -3,5 +3,6 @@ group 'Hooks'
 subprojects {
     dependencies {
         compileOnly project(":API")
+        compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     }
 }

@@ -1,5 +1,6 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import com.pablo67340.guishop.Main;
 import com.pablo67340.guishop.definition.Price;
 import org.bukkit.OfflinePlayer;
@@ -16,7 +17,7 @@ public class ShopsBridge_GUIShop implements IShopsBridge {
 
     public ShopsBridge_GUIShop(Plugin plugin) {
         this.plugin = Main.getINSTANCE();
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
+        Scheduler.runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
     @Override

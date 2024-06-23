@@ -1,4 +1,4 @@
-package com.bgsoftware.common.shopsbridge;
+package com.bgsoftware.common.shopsbridge.internal;
 
 import org.bukkit.inventory.ItemStack;
 

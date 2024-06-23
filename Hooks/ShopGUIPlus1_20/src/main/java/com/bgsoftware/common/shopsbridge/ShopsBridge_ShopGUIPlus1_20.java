@@ -1,5 +1,7 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.ItemStackCache;
+import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import net.brcdev.shopgui.ShopGuiPlugin;
 import net.brcdev.shopgui.player.PlayerData;
 import net.brcdev.shopgui.shop.Shop;
@@ -22,7 +24,7 @@ public class ShopsBridge_ShopGUIPlus1_20 implements IShopsBridge {
 
     public ShopsBridge_ShopGUIPlus1_20(Plugin plugin) {
         this.plugin = ShopGuiPlugin.getInstance();
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
+        Scheduler.runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import me.gypopo.economyshopgui.api.EconomyShopGUIHook;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
@@ -15,7 +16,7 @@ public class ShopsBridge_EconomyShopGUI implements IShopsBridge {
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
 
     public ShopsBridge_EconomyShopGUI(Plugin plugin) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
+        Scheduler.runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
     @Override

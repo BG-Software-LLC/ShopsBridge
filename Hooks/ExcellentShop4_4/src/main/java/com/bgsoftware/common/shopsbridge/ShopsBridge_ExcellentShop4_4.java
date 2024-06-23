@@ -1,6 +1,8 @@
 package com.bgsoftware.common.shopsbridge;
 
 import com.bgsoftware.common.reflection.ReflectMethod;
+import com.bgsoftware.common.shopsbridge.internal.ItemStackCache;
+import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -27,7 +29,7 @@ public class ShopsBridge_ExcellentShop4_4 implements IShopsBridge {
 
     public ShopsBridge_ExcellentShop4_4(Plugin plugin) {
         this.excellentShop = JavaPlugin.getPlugin(ExcellentShop.class);
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
+        Scheduler.runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
     @Override

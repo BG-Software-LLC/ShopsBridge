@@ -1,5 +1,7 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.ItemStackCache;
+import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -19,7 +21,7 @@ public class ShopsBridge_QuantumShop implements IShopsBridge {
 
     public ShopsBridge_QuantumShop(Plugin plugin) {
         this.guiShop = QuantumShop.instance.getGUIShop();
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
+        Scheduler.runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
     @Override

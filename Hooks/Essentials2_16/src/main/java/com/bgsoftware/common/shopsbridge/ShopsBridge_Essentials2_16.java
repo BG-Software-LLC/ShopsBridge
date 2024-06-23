@@ -1,5 +1,6 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.Worth;
 import org.bukkit.OfflinePlayer;
@@ -16,7 +17,7 @@ public class ShopsBridge_Essentials2_16 implements IShopsBridge {
 
     public ShopsBridge_Essentials2_16(Plugin plugin) {
         this.plugin = Essentials.getPlugin(Essentials.class);
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
+        Scheduler.runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
     @Override

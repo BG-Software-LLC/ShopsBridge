@@ -2,6 +2,8 @@ package com.bgsoftware.common.shopsbridge;
 
 import com.Zrips.CMI.CMI;
 import com.Zrips.CMI.Modules.Worth.WorthItem;
+import com.bgsoftware.common.shopsbridge.internal.ItemStackCache;
+import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -14,7 +16,7 @@ public class ShopsBridge_CMI implements IShopsBridge {
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
 
     public ShopsBridge_CMI(Plugin plugin) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
+        Scheduler.runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
     @Override

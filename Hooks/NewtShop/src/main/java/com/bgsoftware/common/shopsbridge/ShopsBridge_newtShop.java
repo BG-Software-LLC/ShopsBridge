@@ -1,5 +1,7 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.ItemStackCache;
+import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import com.newtjam.newtShop.newtShop;
 import com.newtjam.newtShop.structure.Item;
 import org.bukkit.OfflinePlayer;
@@ -14,7 +16,7 @@ public class ShopsBridge_newtShop implements IShopsBridge {
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
 
     public ShopsBridge_newtShop(Plugin plugin) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
+        Scheduler.runTaskLater(plugin, () -> this.readyFuture.complete(null), 1L);
     }
 
     @Override

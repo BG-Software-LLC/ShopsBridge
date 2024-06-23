@@ -1,5 +1,6 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.ItemStackCache;
 import net.brcdev.shopgui.ShopGuiPlugin;
 import net.brcdev.shopgui.event.ShopsPostLoadEvent;
 import net.brcdev.shopgui.shop.item.ShopItem;
