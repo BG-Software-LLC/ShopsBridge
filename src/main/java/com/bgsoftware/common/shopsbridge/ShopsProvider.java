@@ -35,13 +35,12 @@ public enum ShopsProvider {
     EXCELLENTSHOP("ExcellentShop", null) {
         @Override
         protected IShopsBridge createInstanceInternal(Plugin plugin) throws Exception {
-            Plugin excellentShop = plugin.getServer().getPluginManager().getPlugin("ExcellentShop");
-
             Class<?> excellentShopClass;
-            try {
-                Class.forName("su.nightexpress.nexshop.api.shop.product.VirtualProduct");
+            if(isClassLoaded("su.nightexpress.nexshop.product.price.AbstractProductPricer")) {
+                excellentShopClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_ExcellentShop4_11");
+            } else if (isClassLoaded("su.nightexpress.nexshop.api.shop.product.VirtualProduct")) {
                 excellentShopClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_ExcellentShop4_8");
-            } catch (ClassNotFoundException error) {
+            } else {
                 excellentShopClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_ExcellentShop4_4");
             }
 
@@ -72,10 +71,9 @@ public enum ShopsProvider {
             Plugin shopGUIPlus = plugin.getServer().getPluginManager().getPlugin("ShopGUIPlus");
             if (shopGUIPlus.getDescription().getVersion().startsWith("1.2")) {
                 return new ShopsBridge_ShopGUIPlus1_20(plugin);
-            } else try {
-                Class.forName("net.brcdev.shopgui.shop.item.ShopItem");
+            } else if (isClassLoaded("net.brcdev.shopgui.shop.item.ShopItem")) {
                 return new ShopsBridge_ShopGUIPlus1_80(plugin);
-            } catch (ClassNotFoundException error) {
+            } else {
                 return new ShopsBridge_ShopGUIPlus1_43(plugin);
             }
         }
@@ -85,10 +83,9 @@ public enum ShopsProvider {
         @Override
         protected IShopsBridge createInstanceInternal(Plugin plugin) {
             // Determine which version of zShop we have installed.
-            try {
-                Class.forName("fr.maxlego08.zshop.api.ShopManager");
+            if (isClassLoaded("fr.maxlego08.zshop.api.ShopManager")) {
                 return new ShopsBridge_zShop3(plugin);
-            } catch (ClassNotFoundException error) {
+            } else {
                 return new ShopsBridge_zShop(plugin);
             }
         }
@@ -144,6 +141,15 @@ public enum ShopsProvider {
         }
 
         return Optional.empty();
+    }
+
+    private static boolean isClassLoaded(String clazz) {
+        try {
+            Class.forName(clazz);
+            return true;
+        } catch (ClassNotFoundException error) {
+            return false;
+        }
     }
 
 }
