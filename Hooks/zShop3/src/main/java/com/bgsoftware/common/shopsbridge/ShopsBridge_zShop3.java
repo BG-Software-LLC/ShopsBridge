@@ -2,6 +2,7 @@ package com.bgsoftware.common.shopsbridge;
 
 import com.bgsoftware.common.annotations.Nullable;
 import com.bgsoftware.common.shopsbridge.internal.ItemStackCache;
+import com.bgsoftware.common.shopsbridge.internal.PricesAccessorNoTransactions;
 import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import fr.maxlego08.zshop.api.ShopManager;
 import fr.maxlego08.zshop.api.buttons.ItemButton;
@@ -17,7 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class ShopsBridge_zShop3 implements IShopsBridge {
+public class ShopsBridge_zShop3 implements PricesAccessorNoTransactions, IShopsBridge {
 
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
     private final ShopManager shopManager;
@@ -29,28 +30,28 @@ public class ShopsBridge_zShop3 implements IShopsBridge {
     }
 
     @Override
-    public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+    public BigDecimal getSellPriceInternal(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> getItemButtonForItem(itemStack, player)
                 .map(itemButton -> BigDecimal.valueOf(itemButton.getSellPrice()))
-        ).orElseGet(() -> this.getSellPrice(itemStack));
+        ).orElseGet(() -> this.getSellPriceInternal(itemStack));
     }
 
     @Override
-    public BigDecimal getSellPrice(ItemStack itemStack) {
+    public BigDecimal getSellPriceInternal(ItemStack itemStack) {
         return getItemButtonForItem(itemStack, null)
                 .map(itemButton -> BigDecimal.valueOf(itemButton.getSellPrice()))
                 .orElse(BigDecimal.ZERO);
     }
 
     @Override
-    public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+    public BigDecimal getBuyPriceInternal(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> getItemButtonForItem(itemStack, player)
                 .map(itemButton -> BigDecimal.valueOf(itemButton.getBuyPrice()))
-        ).orElseGet(() -> this.getBuyPrice(itemStack));
+        ).orElseGet(() -> this.getBuyPriceInternal(itemStack));
     }
 
     @Override
-    public BigDecimal getBuyPrice(ItemStack itemStack) {
+    public BigDecimal getBuyPriceInternal(ItemStack itemStack) {
         return getItemButtonForItem(itemStack, null)
                 .map(itemButton -> BigDecimal.valueOf(itemButton.getBuyPrice()))
                 .orElse(BigDecimal.ZERO);
@@ -70,20 +71,20 @@ public class ShopsBridge_zShop3 implements IShopsBridge {
         return shopManager.getItemButton(player, itemStack);
     }
 
-    private class BulkTransactionImpl implements BulkTransaction {
+    private class BulkTransactionImpl implements PricesAccessorNoTransactions, BulkTransaction {
 
         private final ItemStackCache<ItemButton> cache = new ItemStackCache<>();
 
         @Override
-        public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+        public BigDecimal getSellPriceInternal(OfflinePlayer offlinePlayer, ItemStack itemStack) {
             return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> Optional.ofNullable(
                             this.cache.computeIfAbsent(itemStack, () -> getItemButtonForItem(itemStack, player).orElse(null)))
                     .map(itemButton -> BigDecimal.valueOf(itemButton.getSellPrice()))
-            ).orElseGet(() -> this.getSellPrice(itemStack));
+            ).orElseGet(() -> this.getSellPriceInternal(itemStack));
         }
 
         @Override
-        public BigDecimal getSellPrice(ItemStack itemStack) {
+        public BigDecimal getSellPriceInternal(ItemStack itemStack) {
             return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () ->
                             getItemButtonForItem(itemStack, null).orElse(null)))
                     .map(itemButton -> BigDecimal.valueOf(itemButton.getSellPrice()))
@@ -91,15 +92,15 @@ public class ShopsBridge_zShop3 implements IShopsBridge {
         }
 
         @Override
-        public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+        public BigDecimal getBuyPriceInternal(OfflinePlayer offlinePlayer, ItemStack itemStack) {
             return Optional.ofNullable(offlinePlayer.getPlayer()).flatMap(player -> Optional.ofNullable(
                             this.cache.computeIfAbsent(itemStack, () -> getItemButtonForItem(itemStack, player).orElse(null)))
                     .map(itemButton -> BigDecimal.valueOf(itemButton.getBuyPrice()))
-            ).orElseGet(() -> this.getBuyPrice(itemStack));
+            ).orElseGet(() -> this.getBuyPriceInternal(itemStack));
         }
 
         @Override
-        public BigDecimal getBuyPrice(ItemStack itemStack) {
+        public BigDecimal getBuyPriceInternal(ItemStack itemStack) {
             return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () ->
                             getItemButtonForItem(itemStack, null).orElse(null)))
                     .map(itemButton -> BigDecimal.valueOf(itemButton.getBuyPrice()))

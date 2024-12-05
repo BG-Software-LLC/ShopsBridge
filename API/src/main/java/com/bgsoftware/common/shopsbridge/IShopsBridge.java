@@ -10,5 +10,4 @@ public interface IShopsBridge extends PricesAccessor {
         return BulkTransaction.noBulk(this);
     }
 
-
 }

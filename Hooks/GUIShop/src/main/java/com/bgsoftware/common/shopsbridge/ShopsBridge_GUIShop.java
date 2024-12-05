@@ -1,5 +1,6 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.PricesAccessorNoTransactions;
 import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import com.pablo67340.guishop.Main;
 import com.pablo67340.guishop.definition.Price;
@@ -10,7 +11,7 @@ import org.bukkit.plugin.Plugin;
 import java.math.BigDecimal;
 import java.util.concurrent.CompletableFuture;
 
-public class ShopsBridge_GUIShop implements IShopsBridge {
+public class ShopsBridge_GUIShop implements PricesAccessorNoTransactions, IShopsBridge {
 
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
     private final Main plugin;
@@ -21,22 +22,22 @@ public class ShopsBridge_GUIShop implements IShopsBridge {
     }
 
     @Override
-    public BigDecimal getSellPrice(OfflinePlayer unused, ItemStack itemStack) {
-        return this.getSellPrice(itemStack);
+    public BigDecimal getSellPriceInternal(OfflinePlayer unused, ItemStack itemStack) {
+        return this.getSellPriceInternal(itemStack);
     }
 
     @Override
-    public BigDecimal getSellPrice(ItemStack itemStack) {
+    public BigDecimal getSellPriceInternal(ItemStack itemStack) {
         return BigDecimal.valueOf(getPrice(itemStack).getSellPrice() * itemStack.getAmount());
     }
 
     @Override
-    public BigDecimal getBuyPrice(OfflinePlayer unused, ItemStack itemStack) {
-        return this.getBuyPrice(itemStack);
+    public BigDecimal getBuyPriceInternal(OfflinePlayer unused, ItemStack itemStack) {
+        return this.getBuyPriceInternal(itemStack);
     }
 
     @Override
-    public BigDecimal getBuyPrice(ItemStack itemStack) {
+    public BigDecimal getBuyPriceInternal(ItemStack itemStack) {
         return BigDecimal.valueOf(getPrice(itemStack).getBuyPrice() * itemStack.getAmount());
     }
 

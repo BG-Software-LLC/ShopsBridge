@@ -1,17 +1,17 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.PricesAccessorNoTransactions;
 import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import me.gypopo.economyshopgui.api.EconomyShopGUIHook;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class ShopsBridge_EconomyShopGUI implements IShopsBridge {
+public class ShopsBridge_EconomyShopGUI implements PricesAccessorNoTransactions, IShopsBridge {
 
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
 
@@ -20,30 +20,30 @@ public class ShopsBridge_EconomyShopGUI implements IShopsBridge {
     }
 
     @Override
-    public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+    public BigDecimal getSellPriceInternal(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         return Optional.ofNullable(offlinePlayer.getPlayer())
                 .map(player -> EconomyShopGUIHook.getItemSellPrice(player, itemStack))
                 .map(BigDecimal::valueOf)
-                .orElseGet(() -> this.getSellPrice(itemStack));
+                .orElseGet(() -> this.getSellPriceInternal(itemStack));
     }
 
     @Override
-    public BigDecimal getSellPrice(ItemStack itemStack) {
+    public BigDecimal getSellPriceInternal(ItemStack itemStack) {
         return Optional.ofNullable(EconomyShopGUIHook.getItemSellPrice(itemStack))
                 .map(BigDecimal::valueOf)
                 .orElse(BigDecimal.ZERO);
     }
 
     @Override
-    public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+    public BigDecimal getBuyPriceInternal(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         return Optional.ofNullable(offlinePlayer.getPlayer())
                 .map(player -> EconomyShopGUIHook.getItemBuyPrice(player, itemStack))
                 .map(BigDecimal::valueOf)
-                .orElseGet(() -> this.getBuyPrice(itemStack));
+                .orElseGet(() -> this.getBuyPriceInternal(itemStack));
     }
 
     @Override
-    public BigDecimal getBuyPrice(ItemStack itemStack) {
+    public BigDecimal getBuyPriceInternal(ItemStack itemStack) {
         return Optional.ofNullable(EconomyShopGUIHook.getItemBuyPrice(itemStack))
                 .map(BigDecimal::valueOf)
                 .orElse(BigDecimal.ZERO);

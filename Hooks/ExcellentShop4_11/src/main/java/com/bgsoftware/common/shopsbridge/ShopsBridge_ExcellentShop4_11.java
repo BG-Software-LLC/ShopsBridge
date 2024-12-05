@@ -3,15 +3,20 @@ package com.bgsoftware.common.shopsbridge;
 import com.bgsoftware.common.annotations.Nullable;
 import com.bgsoftware.common.shopsbridge.internal.ItemStackCache;
 import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
+import com.bgsoftware.common.shopsbridge.internal.transaction.AbstractTransaction;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import su.nightexpress.nexshop.ShopAPI;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
+import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 
 import java.math.BigDecimal;
@@ -27,45 +32,41 @@ public class ShopsBridge_ExcellentShop4_11 implements IShopsBridge {
     }
 
     @Override
-    public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+    public com.bgsoftware.common.shopsbridge.Transaction getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         Player player = offlinePlayer.getPlayer();
         if (player != null) {
             return getVirtualProductFor(itemStack, TradeType.SELL, player)
-                    .map(virtualProduct -> getSellPriceFor(virtualProduct, player, itemStack))
-                    .map(BigDecimal::valueOf)
-                    .orElseGet(() -> this.getSellPrice(itemStack));
+                    .map(virtualProduct -> getSellTransactionFor(virtualProduct, player, itemStack))
+                    .orElseGet(() -> (TransactionImpl) this.getSellPrice(itemStack));
         }
 
         return this.getSellPrice(itemStack);
     }
 
     @Override
-    public BigDecimal getSellPrice(ItemStack itemStack) {
+    public com.bgsoftware.common.shopsbridge.Transaction getSellPrice(ItemStack itemStack) {
         return getShopProduct(itemStack, TradeType.SELL)
-                .map(virtualProduct -> getSellPriceFor(virtualProduct, null, itemStack))
-                .map(BigDecimal::valueOf)
-                .orElse(BigDecimal.ZERO);
+                .map(virtualProduct -> getSellTransactionFor(virtualProduct, null, itemStack))
+                .orElseGet(() -> new TransactionImpl(null, Transaction.Type.SELL, itemStack, BigDecimal.ZERO, null));
     }
 
     @Override
-    public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+    public com.bgsoftware.common.shopsbridge.Transaction getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
         Player player = offlinePlayer.getPlayer();
         if (player != null) {
             return getVirtualProductFor(itemStack, TradeType.BUY, player)
-                    .map(virtualProduct -> getBuyPriceFor(virtualProduct, player, itemStack))
-                    .map(BigDecimal::valueOf)
-                    .orElseGet(() -> this.getBuyPrice(itemStack));
+                    .map(virtualProduct -> getBuyTransactionFor(virtualProduct, player, itemStack))
+                    .orElseGet(() -> (TransactionImpl) this.getBuyPrice(itemStack));
         }
 
         return this.getBuyPrice(itemStack);
     }
 
     @Override
-    public BigDecimal getBuyPrice(ItemStack itemStack) {
+    public com.bgsoftware.common.shopsbridge.Transaction getBuyPrice(ItemStack itemStack) {
         return getShopProduct(itemStack, TradeType.BUY)
-                .map(virtualProduct -> getBuyPriceFor(virtualProduct, null, itemStack))
-                .map(BigDecimal::valueOf)
-                .orElse(BigDecimal.ZERO);
+                .map(virtualProduct -> getBuyTransactionFor(virtualProduct, null, itemStack))
+                .orElseGet(() -> new TransactionImpl(null, Transaction.Type.BUY, itemStack, BigDecimal.ZERO, null));
     }
 
     @Override
@@ -115,14 +116,16 @@ public class ShopsBridge_ExcellentShop4_11 implements IShopsBridge {
         });
     }
 
-    private static double getSellPriceFor(VirtualProduct product, @Nullable Player player, ItemStack itemStack) {
+    private static TransactionImpl getSellTransactionFor(VirtualProduct product, @Nullable Player player, ItemStack itemStack) {
         double sellPrice = player == null ? product.getPricer().getSellPrice() : product.getPriceSell(player);
-        return sellPrice * ((double) itemStack.getAmount() / product.getUnitAmount());
+        double finalPrice = sellPrice * ((double) itemStack.getAmount() / product.getUnitAmount());
+        return new TransactionImpl(player, Transaction.Type.SELL, itemStack, BigDecimal.valueOf(finalPrice), product);
     }
 
-    private static double getBuyPriceFor(VirtualProduct product, @Nullable Player player, ItemStack itemStack) {
+    private static TransactionImpl getBuyTransactionFor(VirtualProduct product, @Nullable Player player, ItemStack itemStack) {
         double buyPrice = player == null ? product.getPricer().getBuyPrice() : product.getPriceBuy(player);
-        return buyPrice * ((double) itemStack.getAmount() / product.getUnitAmount());
+        double finalPrice = buyPrice * ((double) itemStack.getAmount() / product.getUnitAmount());
+        return new TransactionImpl(player, Transaction.Type.BUY, itemStack, BigDecimal.valueOf(finalPrice), product);
     }
 
     private class BulkTransactionImpl implements BulkTransaction {
@@ -130,51 +133,81 @@ public class ShopsBridge_ExcellentShop4_11 implements IShopsBridge {
         private final ItemStackCache<VirtualProduct> cache = new ItemStackCache<>();
 
         @Override
-        public BigDecimal getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+        public Transaction getSellPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
             Player player = offlinePlayer.getPlayer();
             if (player != null) {
                 return Optional.ofNullable(this.cache.computeIfAbsent(itemStack,
                                 () -> getVirtualProductFor(itemStack, TradeType.SELL, player).orElse(null)))
-                        .map(virtualProduct -> getSellPriceFor(virtualProduct, player, itemStack))
-                        .map(BigDecimal::valueOf)
-                        .orElseGet(() -> this.getSellPrice(itemStack));
+                        .map(virtualProduct -> getSellTransactionFor(virtualProduct, player, itemStack))
+                        .orElseGet(() -> (TransactionImpl) this.getSellPrice(itemStack));
             }
 
             return this.getSellPrice(itemStack);
         }
 
         @Override
-        public BigDecimal getSellPrice(ItemStack itemStack) {
+        public Transaction getSellPrice(ItemStack itemStack) {
             return Optional.ofNullable(this.cache.computeIfAbsent(itemStack,
                             () -> getShopProduct(itemStack, TradeType.SELL).orElse(null)))
-                    .map(virtualProduct -> getSellPriceFor(virtualProduct, null, itemStack))
-                    .map(BigDecimal::valueOf)
-                    .orElse(BigDecimal.ZERO);
+                    .map(virtualProduct -> getSellTransactionFor(virtualProduct, null, itemStack))
+                    .orElseGet(() -> new TransactionImpl(null, Transaction.Type.SELL, itemStack, BigDecimal.ZERO, null));
         }
 
         @Override
-        public BigDecimal getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
+        public Transaction getBuyPrice(OfflinePlayer offlinePlayer, ItemStack itemStack) {
             Player player = offlinePlayer.getPlayer();
             if (player != null) {
                 return Optional.ofNullable(this.cache.computeIfAbsent(itemStack,
                                 () -> getVirtualProductFor(itemStack, TradeType.BUY, player).orElse(null)))
-                        .map(virtualProduct -> getBuyPriceFor(virtualProduct, player, itemStack))
-                        .map(BigDecimal::valueOf)
-                        .orElseGet(() -> this.getBuyPrice(itemStack));
+                        .map(virtualProduct -> getBuyTransactionFor(virtualProduct, player, itemStack))
+                        .orElseGet(() -> (TransactionImpl) this.getBuyPrice(itemStack));
             }
 
             return this.getBuyPrice(itemStack);
         }
 
         @Override
-        public BigDecimal getBuyPrice(ItemStack itemStack) {
+        public Transaction getBuyPrice(ItemStack itemStack) {
             return Optional.ofNullable(this.cache.computeIfAbsent(itemStack,
                             () -> getShopProduct(itemStack, TradeType.BUY).orElse(null)))
-                    .map(virtualProduct -> getBuyPriceFor(virtualProduct, null, itemStack))
-                    .map(BigDecimal::valueOf)
-                    .orElse(BigDecimal.ZERO);
+                    .map(virtualProduct -> getBuyTransactionFor(virtualProduct, null, itemStack))
+                    .orElseGet(() -> new TransactionImpl(null, Transaction.Type.BUY, itemStack, BigDecimal.ZERO, null));
         }
 
+    }
+
+    private static class TransactionImpl extends AbstractTransaction {
+
+        private static final ShopPlugin shopPlugin = JavaPlugin.getPlugin(ShopPlugin.class);
+
+        @Nullable
+        private final VirtualProduct product;
+
+        TransactionImpl(@Nullable OfflinePlayer player, Type type, ItemStack itemStack, BigDecimal price, @Nullable VirtualProduct product) {
+            super(player, type, itemStack, price);
+            this.product = product;
+        }
+
+        @Override
+        public void onTransact() {
+            if (this.product == null || product.getPricer().getType() != PriceType.DYNAMIC)
+                return;
+
+            Player player = Optional.ofNullable(getPlayer()).map(OfflinePlayer::getPlayer).orElse(null);
+            if (player == null)
+                return;
+
+            VirtualShop virtualShop = product.getShop();
+
+            TradeType tradeType = getType() == Type.SELL ? TradeType.SELL : TradeType.BUY;
+            su.nightexpress.nexshop.api.shop.Transaction transaction = new su.nightexpress.nexshop.api.shop.Transaction(
+                    shopPlugin, this.product, tradeType, getItem().getAmount(), getPrice().doubleValue(),
+                    su.nightexpress.nexshop.api.shop.Transaction.Result.SUCCESS);
+            ShopTransactionEvent shopTransactionEvent = new ShopTransactionEvent(player, virtualShop, transaction);
+
+            virtualShop.getPricer().onTransaction(shopTransactionEvent);
+            virtualShop.getStock().onTransaction(shopTransactionEvent);
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package com.bgsoftware.common.shopsbridge;
 
+import com.bgsoftware.common.shopsbridge.internal.PricesAccessorNoTransactions;
 import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import com.muhammaddaffa.nextgens.NextGens;
 import org.bukkit.OfflinePlayer;
@@ -10,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class ShopsBridge_NextGens implements IShopsBridge {
+public class ShopsBridge_NextGens implements PricesAccessorNoTransactions, IShopsBridge {
 
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
 
@@ -20,12 +21,12 @@ public class ShopsBridge_NextGens implements IShopsBridge {
     }
 
     @Override
-    public BigDecimal getSellPrice(OfflinePlayer unused, ItemStack itemStack) {
-        return this.getSellPrice(itemStack);
+    public BigDecimal getSellPriceInternal(OfflinePlayer unused, ItemStack itemStack) {
+        return this.getSellPriceInternal(itemStack);
     }
 
     @Override
-    public BigDecimal getSellPrice(ItemStack itemStack) {
+    public BigDecimal getSellPriceInternal(ItemStack itemStack) {
         BigDecimal price = Optional.ofNullable(NextGens.getApi().getWorth(itemStack))
                 .map(BigDecimal::valueOf).orElse(null);
         return price == null ? BigDecimal.ZERO : itemStack.getAmount() <= 1 ? price :
@@ -33,14 +34,14 @@ public class ShopsBridge_NextGens implements IShopsBridge {
     }
 
     @Override
-    public BigDecimal getBuyPrice(OfflinePlayer unused, ItemStack itemStack) {
-        return this.getBuyPrice(itemStack);
+    public BigDecimal getBuyPriceInternal(OfflinePlayer unused, ItemStack itemStack) {
+        return this.getBuyPriceInternal(itemStack);
     }
 
     @Override
-    public BigDecimal getBuyPrice(ItemStack itemStack) {
+    public BigDecimal getBuyPriceInternal(ItemStack itemStack) {
         // No buy price, we'll use sell price instead.
-        return this.getSellPrice(itemStack);
+        return this.getSellPriceInternal(itemStack);
     }
 
     @Override

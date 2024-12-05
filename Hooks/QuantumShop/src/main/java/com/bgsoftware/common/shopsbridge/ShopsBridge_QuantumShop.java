@@ -1,6 +1,7 @@
 package com.bgsoftware.common.shopsbridge;
 
 import com.bgsoftware.common.shopsbridge.internal.ItemStackCache;
+import com.bgsoftware.common.shopsbridge.internal.PricesAccessorNoTransactions;
 import com.bgsoftware.common.shopsbridge.internal.scheduler.Scheduler;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
@@ -14,7 +15,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class ShopsBridge_QuantumShop implements IShopsBridge {
+public class ShopsBridge_QuantumShop implements PricesAccessorNoTransactions, IShopsBridge {
 
     private final CompletableFuture<Void> readyFuture = new CompletableFuture<>();
     private final GUIShop guiShop;
@@ -25,24 +26,24 @@ public class ShopsBridge_QuantumShop implements IShopsBridge {
     }
 
     @Override
-    public BigDecimal getSellPrice(OfflinePlayer unused, ItemStack itemStack) {
-        return this.getSellPrice(itemStack);
+    public BigDecimal getSellPriceInternal(OfflinePlayer unused, ItemStack itemStack) {
+        return this.getSellPriceInternal(itemStack);
     }
 
     @Override
-    public BigDecimal getSellPrice(ItemStack itemStack) {
+    public BigDecimal getSellPriceInternal(ItemStack itemStack) {
         return getShopProduct(itemStack)
                 .map(shopProduct -> BigDecimal.valueOf(shopProduct.getSellPrice()))
                 .orElse(BigDecimal.ZERO);
     }
 
     @Override
-    public BigDecimal getBuyPrice(OfflinePlayer unused, ItemStack itemStack) {
-        return this.getBuyPrice(itemStack);
+    public BigDecimal getBuyPriceInternal(OfflinePlayer unused, ItemStack itemStack) {
+        return this.getBuyPriceInternal(itemStack);
     }
 
     @Override
-    public BigDecimal getBuyPrice(ItemStack itemStack) {
+    public BigDecimal getBuyPriceInternal(ItemStack itemStack) {
         return getShopProduct(itemStack)
                 .map(shopProduct -> BigDecimal.valueOf(shopProduct.getBuyPrice(true)))
                 .orElse(BigDecimal.ZERO);
@@ -78,29 +79,29 @@ public class ShopsBridge_QuantumShop implements IShopsBridge {
         }
     }
 
-    private class BulkTransactionImpl implements BulkTransaction {
+    private class BulkTransactionImpl implements PricesAccessorNoTransactions, BulkTransaction {
 
         private final ItemStackCache<ShopProduct> cache = new ItemStackCache<>();
 
         @Override
-        public BigDecimal getSellPrice(OfflinePlayer unused, ItemStack itemStack) {
-            return this.getSellPrice(itemStack);
+        public BigDecimal getSellPriceInternal(OfflinePlayer unused, ItemStack itemStack) {
+            return this.getSellPriceInternal(itemStack);
         }
 
         @Override
-        public BigDecimal getSellPrice(ItemStack itemStack) {
+        public BigDecimal getSellPriceInternal(ItemStack itemStack) {
             return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> getShopProduct(itemStack).orElse(null)))
                     .map(shopProduct -> BigDecimal.valueOf(shopProduct.getSellPrice()))
                     .orElse(BigDecimal.ZERO);
         }
 
         @Override
-        public BigDecimal getBuyPrice(OfflinePlayer unused, ItemStack itemStack) {
-            return this.getBuyPrice(itemStack);
+        public BigDecimal getBuyPriceInternal(OfflinePlayer unused, ItemStack itemStack) {
+            return this.getBuyPriceInternal(itemStack);
         }
 
         @Override
-        public BigDecimal getBuyPrice(ItemStack itemStack) {
+        public BigDecimal getBuyPriceInternal(ItemStack itemStack) {
             return Optional.ofNullable(this.cache.computeIfAbsent(itemStack, () -> getShopProduct(itemStack).orElse(null)))
                     .map(shopProduct -> BigDecimal.valueOf(shopProduct.getBuyPrice(true)))
                     .orElse(BigDecimal.ZERO);
