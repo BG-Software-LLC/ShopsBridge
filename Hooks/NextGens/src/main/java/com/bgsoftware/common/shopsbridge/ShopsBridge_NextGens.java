@@ -27,9 +27,8 @@ public class ShopsBridge_NextGens implements PricesAccessorNoTransactions, IShop
 
     @Override
     public BigDecimal getSellPriceInternal(ItemStack itemStack) {
-        BigDecimal price = Optional.ofNullable(NextGens.getApi().getWorth(itemStack))
-                .map(BigDecimal::valueOf).orElse(null);
-        return price == null ? BigDecimal.ZERO : price;
+        return Optional.ofNullable(NextGens.getApi().getWorth(itemStack))
+                .map(BigDecimal::valueOf).orElse(BigDecimal.ZERO);
     }
 
     @Override
