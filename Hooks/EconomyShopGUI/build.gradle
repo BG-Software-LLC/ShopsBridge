@@ -1,5 +1,5 @@
 group 'Hooks:EconomyShopGUI'
 
 dependencies {
-    compileOnly "me.gypopo:EconomyShopGUI:4.0.2"
+    compileOnly "me.gypopo:EconomyShopGUI:5.19.2"
 }
