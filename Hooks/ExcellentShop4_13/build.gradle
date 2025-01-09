@@ -1,8 +1,8 @@
-group 'Hooks:ExcellentShop4_11'
+group 'Hooks:ExcellentShop4_13'
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(20))
     }
 }
 
@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'su.nightexpress.nexshop:ExcellentShop:4.11.4'
-    compileOnly 'su.nexmedia.engine:NexEngine:2.6.3'
+    compileOnly 'su.nightexpress.nexshop:ExcellentShop:4.13.4'
+    compileOnly 'su.nexmedia.engine:NexEngine:2.7.3'
     compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:1.0.2"
 }
