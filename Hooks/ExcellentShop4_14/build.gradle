@@ -1,0 +1,17 @@
+group 'Hooks:ExcellentShop4_14'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(20))
+    }
+}
+
+repositories {
+    maven { url 'https://repo.bg-software.com/repository/common/' }
+}
+
+dependencies {
+    compileOnly 'su.nightexpress.nexshop:ExcellentShop:4.14.0'
+    compileOnly 'su.nexmedia.engine:NexEngine:2.7.3.2'
+    compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:1.0.2"
+}
