@@ -36,7 +36,9 @@ public enum ShopsProvider {
         @Override
         protected IShopsBridge createInstanceInternal(Plugin plugin) throws Exception {
             Class<?> excellentShopClass;
-            if (isClassLoaded("su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct")) {
+            if (isClassLoaded("su.nightexpress.nexshop.product.content.ProductContent")) {
+                excellentShopClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_ExcellentShop4_20");
+            } else if (isClassLoaded("su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct")) {
                 excellentShopClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_ExcellentShop4_14");
             } else if (isClassLoaded("su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping")) {
                 excellentShopClass = Class.forName("com.bgsoftware.common.shopsbridge.ShopsBridge_ExcellentShop4_13");
