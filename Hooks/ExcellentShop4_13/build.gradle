@@ -13,5 +13,5 @@ repositories {
 dependencies {
     compileOnly 'su.nightexpress.nexshop:ExcellentShop:4.13.4'
     compileOnly 'su.nexmedia.engine:NexEngine:2.7.3'
-    compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:1.0.2"
+    compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:b8"
 }

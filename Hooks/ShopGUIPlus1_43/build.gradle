@@ -6,5 +6,5 @@ repositories {
 
 dependencies {
     compileOnly "net.brcdev:ShopGUIPlus:1.43.2"
-    compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:1.0.2"
+    compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:b8"
 }
