@@ -1,0 +1,17 @@
+group 'Hooks:ExcellentShop5_0'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+repositories {
+    maven { url 'https://repo.bg-software.com/repository/common/' }
+}
+
+dependencies {
+    compileOnly 'su.nightexpress.nexshop:ExcellentShop:5.0.0-beta'
+    compileOnly 'su.nexmedia.engine:NexEngine:2.15.1'
+    compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:b8"
+}
